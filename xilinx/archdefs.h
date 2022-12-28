@@ -17,13 +17,19 @@
  *
  */
 
-#ifndef NEXTPNR_H
-#error Include "archdefs.h" via "nextpnr.h" only.
-#endif
+#ifndef XILINX_ARCHDEFS_H
+#define XILINX_ARCHDEFS_H
+
+#include "base_clusterinfo.h"
+#include "hashlib.h"
+#include "idstring.h"
+#include "nextpnr_namespaces.h"
 
 NEXTPNR_NAMESPACE_BEGIN
 
 typedef int delay_t;
+typedef IdString ClusterId;
+typedef IdString BelBucketId;
 
 struct DelayInfo
 {
@@ -253,3 +259,4 @@ template <> struct hash<NEXTPNR_NAMESPACE_PREFIX DecalId>
     }
 };
 } // namespace std
+#endif /* XILINX_ARCHDEFS_H */

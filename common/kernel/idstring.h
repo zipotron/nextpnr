@@ -36,8 +36,7 @@ struct IdString
 
     static void initialize_add(const BaseCtx *ctx, const char *s, int idx);
 
-    constexpr IdString() : index(0) {}
-    explicit constexpr IdString(int index) : index(index) {}
+    constexpr IdString(int index = 0) : index(index) {}
 
     void set(const BaseCtx *ctx, const std::string &s);
 

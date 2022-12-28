@@ -19,38 +19,17 @@
  *
  */
 
-#ifndef NEXTPNR_H
-#error Include "arch.h" via "nextpnr.h" only.
-#endif
+#ifndef XILINX_ARCH_H
+#define XILINX_ARCH_H
+
+#include "base_arch.h"
+#include "nextpnr_types.h"
+#include "relptr.h"
 
 #include <boost/iostreams/device/mapped_file.hpp>
-
 #include <iostream>
 
 NEXTPNR_NAMESPACE_BEGIN
-
-/**** Everything in this section must be kept in sync with chipdb.py ****/
-
-template <typename T> struct RelPtr
-{
-    int32_t offset;
-
-    // void set(const T *ptr) {
-    //     offset = reinterpret_cast<const char*>(ptr) -
-    //              reinterpret_cast<const char*>(this);
-    // }
-
-    const T *get() const
-    {
-        return reinterpret_cast<const T *>(reinterpret_cast<const char *>(this) + int64_t(offset) * 4);
-    }
-
-    const T &operator[](size_t index) const { return get()[index]; }
-
-    const T &operator*() const { return *(get()); }
-
-    const T *operator->() const { return get(); }
-};
 
 // Quasi-deduplicated architecture
 //
@@ -322,6 +301,28 @@ NPNR_PACKED_STRUCT(struct ChipInfoPOD {
 });
 
 /************************ End of chipdb section. ************************/
+
+struct ArcBounds
+{
+    int x0 = -1, y0 = -1, x1 = -1, y1 = -1;
+
+    ArcBounds() {}
+    ArcBounds(int x0, int y0, int x1, int y1) : x0(x0), y0(y0), x1(x1), y1(y1){};
+
+    int distance(Loc loc) const
+    {
+        int dist = 0;
+        if (loc.x < x0)
+            dist += x0 - loc.x;
+        if (loc.x > x1)
+            dist += loc.x - x1;
+        if (loc.y < y0)
+            dist += y0 - loc.y;
+        if (loc.y > y1)
+            dist += loc.y - y1;
+        return dist;
+    };
+};
 
 struct BelIterator
 {
@@ -1626,3 +1627,4 @@ struct Arch : BaseCtx
 };
 
 NEXTPNR_NAMESPACE_END
+#endif /* XILINX_ARCH_H */
