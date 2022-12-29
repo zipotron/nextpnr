@@ -740,18 +740,18 @@ struct Arch : BaseCtx
 
     void setup_byname() const;
 
-    BelId getBelByName(IdString name) const;
+    BelId getBelByName(IdStringList name) const;
 
-    IdString getBelName(BelId bel) const
+    IdStringList getBelName(BelId bel) const
     {
         NPNR_ASSERT(bel != BelId());
         int site = locInfo(bel).bel_data[bel.index].site;
         if (site != -1) {
             return id(std::string(chip_info->tile_insts[bel.tile].site_insts[site].name.get()) + "/" +
-                      IdString(locInfo(bel).bel_data[bel.index].name).str(this));
+                      IdStringList(locInfo(bel).bel_data[bel.index].name).str(this));
         } else {
             return id(std::string(chip_info->tile_insts[bel.tile].name.get()) + "/" +
-                      IdString(locInfo(bel).bel_data[bel.index].name).str(this));
+                      IdStringList(locInfo(bel).bel_data[bel.index].name).str(this));
         }
     }
 
@@ -953,7 +953,7 @@ struct Arch : BaseCtx
 
     mutable std::unordered_map<IdString, WireId> wire_by_name_cache;
 
-    WireId getWireByName(IdString name) const;
+    WireId getWireByName(IdStringList name) const;
 
     const TileWireInfoPOD &wireInfo(WireId wire) const
     {
@@ -965,19 +965,19 @@ struct Arch : BaseCtx
         }
     }
 
-    IdString getWireName(WireId wire) const
+    IdStringList getWireName(WireId wire) const
     {
         NPNR_ASSERT(wire != WireId());
         if (wire.tile != -1 && locInfo(wire).wire_data[wire.index].site != -1) {
             return id(std::string("SITEWIRE/") +
                       chip_info->tile_insts[wire.tile].site_insts[locInfo(wire).wire_data[wire.index].site].name.get() +
-                      std::string("/") + IdString(locInfo(wire).wire_data[wire.index].name).str(this));
+                      std::string("/") + IdStringList(locInfo(wire).wire_data[wire.index].name).str(this));
         } else {
             return id(std::string(chip_info
                                           ->tile_insts[wire.tile == -1 ? chip_info->nodes[wire.index].tile_wires[0].tile
                                                                        : wire.tile]
                                           .name.get()) +
-                      "/" + IdString(wireInfo(wire).name).c_str(this));
+                      "/" + IdStringList(wireInfo(wire).name).str(this));
         }
     }
 
@@ -1101,7 +1101,7 @@ struct Arch : BaseCtx
 
     mutable std::unordered_map<IdString, PipId> pip_by_name_cache;
 
-    PipId getPipByName(IdString name) const;
+    PipId getPipByName(IdStringList name) const;
 
     void bindPip(PipId pip, NetInfo *net, PlaceStrength strength)
     {
@@ -1258,7 +1258,7 @@ struct Arch : BaseCtx
         return loc;
     }
 
-    IdString getPipName(PipId pip) const;
+    IdStringList getPipName(PipId pip) const;
 
     IdString getPipType(PipId pip) const;
     std::vector<std::pair<IdString, std::string>> getPipAttrs(PipId pip) const;

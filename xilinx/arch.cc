@@ -126,7 +126,7 @@ void Arch::setup_byname() const
     }
 }
 
-BelId Arch::getBelByName(IdString name) const
+BelId Arch::getBelByName(IdStringList name) const
 {
     BelId ret;
 
@@ -216,7 +216,7 @@ PortType Arch::getBelPinType(BelId bel, IdString pin) const
 
 // -----------------------------------------------------------------------
 
-WireId Arch::getWireByName(IdString name) const
+WireId Arch::getWireByName(IdStringList name) const
 {
     if (wire_by_name_cache.count(name))
         return wire_by_name_cache.at(name);
@@ -264,7 +264,7 @@ std::vector<std::pair<IdString, std::string>> Arch::getWireAttrs(WireId wire) co
 
 // -----------------------------------------------------------------------
 
-PipId Arch::getPipByName(IdString name) const
+PipId Arch::getPipByName(IdStringList name) const
 {
     if (pip_by_name_cache.count(name))
         return pip_by_name_cache.at(name);
@@ -310,7 +310,7 @@ PipId Arch::getPipByName(IdString name) const
     return ret;
 }
 
-IdString Arch::getPipName(PipId pip) const
+IdStringList Arch::getPipName(PipId pip) const
 {
     NPNR_ASSERT(pip != PipId());
     if (locInfo(pip).pip_data[pip.index].site != -1 && locInfo(pip).pip_data[pip.index].flags == PIP_SITE_INTERNAL &&
