@@ -1045,10 +1045,9 @@ struct Arch : BaseCtx
         return w2n == wire_to_net.end() ? nullptr : w2n->second;
     }
 
-    DelayInfo getWireDelay(WireId wire) const
+    DelayQuad getWireDelay(WireId wire) const
     {
-        DelayInfo delay;
-        delay.delay = 0;
+        DelayQuad delay(0);
         return delay;
     }
 
@@ -1366,9 +1365,9 @@ struct Arch : BaseCtx
             return locInfo(wire).wire_data[wire.index].intent;
     }
 
-    DelayInfo getPipDelay(PipId pip) const
+    DelayQuad getPipDelay(PipId pip) const
     {
-        DelayInfo delay;
+        DelayQuad delay;
         NPNR_ASSERT(pip != PipId());
         if (locInfo(pip).pip_data[pip.index].flags == PIP_TILE_ROUTING) {
             int src_intent = wireIntent(getPipSrcWire(pip)), dst_intent = wireIntent(getPipDstWire(pip));
@@ -1379,12 +1378,21 @@ struct Arch : BaseCtx
                 if (dst_intent == ID_NODE_LOCAL || dst_intent == ID_NODE_HLONG || dst_intent == ID_NODE_VLONG ||
                     dst_intent == ID_NODE_VQUAD || dst_intent == ID_NODE_HQUAD) {
                     // Assign a high penalty from global to local
-                    delay.delay = 250;
+                    delay.rise.min_delay = 250;
+                    delay.rise.max_delay = 250;
+                    delay.fall.min_delay = 250;
+                    delay.fall.max_delay = 250;
                 } else {
-                    delay.delay = 100;
+                    delay.rise.min_delay = 100;
+                    delay.rise.max_delay = 100;
+                    delay.fall.min_delay = 100;
+                    delay.fall.max_delay = 100;
                 }
             } else if (dst_intent == ID_NODE_LAGUNA_DATA) {
-                delay.delay = 5000;
+                delay.rise.min_delay = 5000;
+                delay.rise.max_delay = 5000;
+                delay.fall.min_delay = 5000;
+                delay.fall.max_delay = 5000;
             } else {
                 const delay_t pip_epsilon = 35;
                 auto &pip_data = locInfo(pip).pip_data[pip.index];
@@ -1410,12 +1418,23 @@ struct Arch : BaseCtx
                     pip_delay += delay_t(
                             (float(src_timing.resistance + pip_timing.resistance) * dst_timing.capacitance) / 1e9);
                 }
-                delay.delay = std::max(pip_delay, pip_epsilon);
+                delay_t aux = std::max(pip_delay, pip_epsilon);
+                delay.rise.min_delay = aux;
+                delay.rise.max_delay = aux;
+                delay.fall.min_delay = aux;
+                delay.fall.max_delay = aux;
             }
         } else if (locInfo(pip).pip_data[pip.index].flags == PIP_LUT_ROUTETHRU) {
-            delay.delay = 300;
-        } else
-            delay.delay = 25;
+            delay.rise.min_delay = 300;
+            delay.rise.max_delay = 300;
+            delay.fall.min_delay = 300;
+            delay.fall.max_delay = 300;
+        } else {
+            delay.rise.min_delay = 25;
+            delay.rise.max_delay = 25;
+            delay.fall.min_delay = 25;
+            delay.fall.max_delay = 25;
+		}
         return delay;
     }
 
@@ -1483,10 +1502,9 @@ struct Arch : BaseCtx
     delay_t getRipupDelayPenalty() const { return 120; }
     delay_t getWireRipupDelayPenalty(WireId wire) const;
     float getDelayNS(delay_t v) const { return v * 0.001; }
-    DelayInfo getDelayFromNS(float ns) const
+    DelayQuad getDelayFromNS(float ns) const
     {
-        DelayInfo del;
-        del.delay = delay_t(ns * 1000);
+        DelayQuad del(ns * 1000);
         return del;
     }
     uint32_t getDelayChecksum(delay_t v) const { return v; }
@@ -1510,7 +1528,7 @@ struct Arch : BaseCtx
 
     // Get the delay through a cell from one port to another, returning false
     // if no path exists. This only considers combinational delays, as required by the Arch API
-    bool getCellDelay(const CellInfo *cell, IdString fromPort, IdString toPort, DelayInfo &delay) const;
+    bool getCellDelay(const CellInfo *cell, IdString fromPort, IdString toPort, DelayQuad &delay) const;
     // Get the port class, also setting clockInfoCount to the number of TimingClockingInfos associated with a port
     TimingPortClass getPortTimingClass(const CellInfo *cell, IdString port, int &clockInfoCount) const;
     // Get the TimingClockingInfo of a port
@@ -1522,7 +1540,7 @@ struct Arch : BaseCtx
     // implemented in arch_place.cc)
 
     bool xc7_cell_timing_lookup(int tt_id, int inst_id, IdString variant, IdString from_port, IdString to_port,
-                                DelayInfo &delay) const;
+                                DelayQuad &delay) const;
 
     // Whether or not a given cell can be placed at a given Bel
     // This is not intended for Bel type checks, but finer-grained constraints

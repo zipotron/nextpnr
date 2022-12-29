@@ -1153,7 +1153,7 @@ DecalXY Arch::getGroupDecal(GroupId pip) const { return {}; };
 
 // -----------------------------------------------------------------------
 
-bool Arch::getCellDelay(const CellInfo *cell, IdString fromPort, IdString toPort, DelayInfo &delay) const
+bool Arch::getCellDelay(const CellInfo *cell, IdString fromPort, IdString toPort, DelayQuad &delay) const
 {
     int tt_id = -1, inst_id = -1;
     if (cell->bel != BelId()) {
@@ -1316,7 +1316,7 @@ boost::optional<const Tres &> db_binary_search(const Tres *list, int count, Tget
 } // namespace
 
 bool Arch::xc7_cell_timing_lookup(int tt_id, int inst_id, IdString variant, IdString from_port, IdString to_port,
-                                  DelayInfo &delay) const
+                                  DelayQuad &delay) const
 {
     if (tt_id == -1 || inst_id == -1)
         return false;
