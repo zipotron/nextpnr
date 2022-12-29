@@ -668,7 +668,23 @@ struct ArchArgs
     std::string chipdb;
 };
 
-struct Arch : BaseCtx
+struct ArchRanges : BaseArchRanges
+{
+    using ArchArgsT = ArchArgs;
+    // Bels
+    using AllBelsRangeT = BelRange;
+    using TileBelsRangeT = BelRange;
+    using BelPinsRangeT = std::vector<IdString>;
+    // Wires
+    using AllWiresRangeT = WireRange;
+    using DownhillPipRangeT = DownhillPipRange;
+    using UphillPipRangeT = UphillPipRange;
+    using WireBelPinRangeT = BelPinRange;
+    // Pips
+    using AllPipsRangeT = AllPipRange;
+};
+
+struct Arch : BaseCtx, BaseArch<ArchRanges>
 {
     boost::iostreams::mapped_file_source blob_file;
     const ChipInfoPOD *chip_info;
